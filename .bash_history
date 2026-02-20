@@ -1,0 +1,2 @@
+cd /c/Users/1238221/Desktop/CHECKME/CHECKME
+cd C:/Users/1238221/Desktop/CHECKME/CHECKME

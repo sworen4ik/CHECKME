@@ -1,0 +1,156 @@
+﻿@model CHECKME.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Мои диаграммы";
+}
+
+<h1 class="mb-4">Мои показатели психического состояния</h1>
+
+<div class="row">
+    <!-- Диаграмма стресса -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Динамика уровня стресса</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.StressData.Any())
+                {
+                    <canvas id="stressChart" width="400" height="300"></canvas>
+                }
+                else
+                {
+                    <p class="text-muted">Пройдите тест на стресс, чтобы увидеть диаграмму</p>
+                    <a asp-controller="Tests" asp-action="Index" class="btn btn-primary">Пройти тест</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Диаграмма тревожности -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">Динамика тревожности</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.AnxietyData.Any())
+                {
+                    <canvas id="anxietyChart" width="400" height="300"></canvas>
+                }
+                else
+                {
+                    <p class="text-muted">Пройдите тест на тревожность, чтобы увидеть диаграмму</p>
+                    <a asp-controller="Tests" asp-action="Index" class="btn btn-primary">Пройти тест</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Диаграмма настроения -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Динамика настроения</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.MoodData.Any())
+                {
+                    <canvas id="moodChart" width="400" height="300"></canvas>
+                }
+                else
+                {
+                    <p class="text-muted">Пройдите тест на настроение, чтобы увидеть диаграмму</p>
+                    <a asp-controller="Tests" asp-action="Index" class="btn btn-primary">Пройти тест</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Последние результаты -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Последние результаты</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentResults.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var result in Model.RecentResults)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @result.Test?.Title
+                                <span class="badge bg-primary rounded-pill">@result.CompletedDate.ToString("dd.MM")</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Вы еще не прошли ни одного теста</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Функция для создания диаграммы
+        function createChart(canvasId, labels, data, label, color) {
+            const ctx = document.getElementById(canvasId)?.getContext('2d');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: data,
+                            borderColor: color,
+                            backgroundColor: color + '20',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        @if (Model.StressData.Any())
+        {
+            <text>
+                        var stressLabels = @Html.Raw(Json.Serialize(Model.StressData.Select(d => d.Date.ToString("dd.MM"))));
+            var stressValues = @Html.Raw(Json.Serialize(Model.StressData.Select(d => d.Value)));
+            createChart('stressChart', stressLabels, stressValues, 'Уровень стресса', 'rgb(13, 110, 253)');
+            </text>
+        }
+
+        @if (Model.AnxietyData.Any())
+        {
+            <text>
+                        var anxietyLabels = @Html.Raw(Json.Serialize(Model.AnxietyData.Select(d => d.Date.ToString("dd.MM"))));
+            var anxietyValues = @Html.Raw(Json.Serialize(Model.AnxietyData.Select(d => d.Value)));
+            createChart('anxietyChart', anxietyLabels, anxietyValues, 'Уровень тревожности', 'rgb(255, 193, 7)');
+            </text>
+        }
+
+        @if (Model.MoodData.Any())
+        {
+            <text>
+                        var moodLabels = @Html.Raw(Json.Serialize(Model.MoodData.Select(d => d.Date.ToString("dd.MM"))));
+            var moodValues = @Html.Raw(Json.Serialize(Model.MoodData.Select(d => d.Value)));
+            createChart('moodChart', moodLabels, moodValues, 'Уровень настроения', 'rgb(25, 135, 84)');
+            </text>
+        }
+    </script>
+}
